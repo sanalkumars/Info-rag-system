@@ -10,3 +10,13 @@ This repo contains the code base for a production level rag system
 ** install the packages from requirement.txt ** 
 
 ## uv pip install -r requirement.txt
+
+
+## AWS SETUP
+- Create an IAM user with programmatic access and give full access
+
+
+## Pinecone Setup
+- Create a free account on pinecone.io
+
+## setup vscode tool/extentsion for postgres
