@@ -20,3 +20,9 @@ This repo contains the code base for a production level rag system
 - Create a free account on pinecone.io
 
 ## setup vscode tool/extentsion for postgres
+
+
+
+
+## Final UI
+![alt text](image.png)
