@@ -49,7 +49,8 @@ def index():
     return pc.Index(name)
 
 def namespace(tenant):
-    return 'tenant-' + tenant
+    suffix = '' if settings().model_provider == 'bedrock' else '-gemini'
+    return 'tenant-' + tenant + suffix
 
 @trace("upsert")
 def upsert(tenant, records):

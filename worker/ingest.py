@@ -3,7 +3,8 @@ import logging
 from pathlib import Path
 from docx import Document
 from pypdf import PdfReader
-from app.aws import client, embed
+from app.aws import client
+from app.models import embed, extract_pdf_pages
 from app.vector import upsert
 from app.config import settings
 from app.db import connection, audit
@@ -51,13 +52,18 @@ def process_s3_key(key):
         blob=obj['Body'].read(s.max_upload_bytes+1)
         if len(blob)>s.max_upload_bytes: raise ValueError('Upload too large')
         if Path(key).suffix.lower()=='.pdf' and not blob.startswith(b'%PDF'): raise ValueError('Invalid PDF')
-        pages=parse(blob,Path(key).suffix.lower())
+        suffix=Path(key).suffix.lower()
+        pages=parse(blob,suffix)
         parts=[(page,part) for page,text in pages for part in chunks(text)]
-        if not parts: raise ValueError('No extractable text; scanned PDFs need Textract OCR')
+        if not parts and suffix=='.pdf' and s.model_provider=='gemini':
+            pages=extract_pdf_pages(blob)
+            parts=[(page,part) for page,text in pages for part in chunks(text)]
+        if not parts:
+            raise ValueError('No extractable text; scanned PDFs require OCR before ingestion.')
         vectors=[]
         for i,(page,part) in enumerate(parts):
             vectors.append({'id':f'{doc["id"]}:{doc["current_version"]}:{i}',
-                'values':embed(part),'metadata':{'document_id':str(doc['id']),
+                'values':embed(part, task_type='RETRIEVAL_DOCUMENT'),'metadata':{'document_id':str(doc['id']),
                 'title':doc['title'],'page':page,'text':part,
                 'owner_sub':doc['owner_sub'],'allowed_groups':doc['allowed_groups']}})
         # Keep batches small; Pinecone metadata must fit the index's limits.
