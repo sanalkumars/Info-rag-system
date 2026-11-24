@@ -422,3 +422,5 @@ Issues and pull requests are welcome where enabled. For substantial changes, des
 **Columbus Enterprise AI** — Practical enterprise RAG engineering, from local development to AWS CI/CD.
 
 </div>
+
+## Deplyed on AWS EC2 with GitHub Actions and Amazon ECR.
